@@ -2,7 +2,7 @@ Package: SummarizeByMonth
 Title: Summarize DataFrame by Month
 Version: 0.0.0.9000
 Authors@R: c(person("Micah", "Cooper", email = "coopermj@miamioh.edu", role = c("aut", "cre")),
-            person("Jeffrey", "Toaddy", email = "toaddyjm@miamioh.edu", role = "aut"))
+            person("Jeffrey", "Toaddy", email = "toaddyjm@miamioh.edu", role = c("aut")))
 Description: Takes a DataFrame containing data columns and a DateStamp column and summaries the data into month means or sums (sums not implemented yet)
 Depends: R (>= 3.3.0)
 License: MIT
