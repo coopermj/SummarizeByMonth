@@ -13,7 +13,7 @@ SummarizeByMonth <- function(df, summarizationMethod, flipNA) {
   library(plyr)
   library(dplyr)
   # Find the beginning/end of the range
-  df <- createsInOrOut
+  # df <- createsInOrOut
   mindate <- min(df$DateStamp)
   maxdate <- max(df$DateStamp)
   # Create a data frame with all the dates
@@ -60,14 +60,21 @@ SummarizeByMonth <- function(df, summarizationMethod, flipNA) {
     sdColumnName <- paste0(columnName,"Sd")
 
     # Create dfs for mean and stddev
-    meanDF <- ddply(data, .(month), summarise, ValuesMn=mean(values))
-    colnames(meanDF)[2] <- meanColumnName
-    sdDF <- ddply(data, .(month), summarise, ValuesSD=sd(values))
-    colnames(sdDF)[2] <- sdColumnName
-
-    jnDF <- full_join(tempdf, meanDF)
-    tempdf <- full_join(jnDF, sdDF)
-
+    if(summarizationMethod == "mean") {
+      workingDF <- ddply(data, .(month), summarise, ValuesMn=mean(values))
+      colnames(workingDF)[2] <- meanColumnName
+      sdDF <- ddply(data, .(month), summarise, ValuesSD=sd(values))
+      colnames(sdDF)[2] <- sdColumnName
+      jnDF <- full_join(tempdf, workingDF)
+      tempdf <- full_join(jnDF, sdDF)
+    } else if(summarizationMethod == "sum") {
+      workingDF <- ddply(data, .(month), summarise, ValuesMn=sum(values))
+      colnames(workingDF)[2] <- meanColumnName
+      jnDF <- full_join(tempdf, workingDF)
+      tempdf <- jnDF
+    } else {
+      print("uhoh")
+    }
   }
 
   return(tempdf)
