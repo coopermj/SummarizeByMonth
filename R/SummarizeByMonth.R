@@ -13,7 +13,7 @@ SummarizeByMonth <- function(df, summarizationMethod, flipNA) {
   library(plyr)
   library(dplyr)
   # Find the beginning/end of the range
-  df <- createsInOrOut
+  # df <- createsInOrOut
   mindate <- min(df$DateStamp)
   maxdate <- max(df$DateStamp)
   # Create a data frame with all the dates
