@@ -3,23 +3,33 @@
 #' @param df Dataframe on which to operate. Must have column DateStamp
 #' @param summarizationMethod String that indicates mean or sum
 #' @param flipNA TRUE or FALSE to convert NAs to 0
+#' @param dateCol Column that contains the date values. Defaults to DateStamp
 #' @keywords summarize month monthly
 #' @export
 #' @examples
 #' SummarizeByMonth(df, "mean", TRUE)
 
-SummarizeByMonth <- function(df, summarizationMethod, flipNA) {
+SummarizeByMonth <- function(df, summarizationMethod, flipNA, dateCol) {
 
   library(plyr)
   library(dplyr)
+  library(data.table)
+
+  browser()
+
+  if (missing(dateCol)) {
+    dateCol = 'DateStamp'
+  } else {
+    setnames(df, dateCol, 'DateStamp')
+  }
+
   # Find the beginning/end of the range
-  # df <- createsInOrOut
   mindate <- min(df$DateStamp)
   maxdate <- max(df$DateStamp)
   # Create a data frame with all the dates
-  ts <- seq.POSIXt(as.POSIXct(mindate), as.POSIXct(maxdate), by="day")
+  ts <- seq.POSIXt(as.POSIXct(mindate), as.POSIXct(maxdate), by = "day")
   ts <- format.POSIXct(ts,'%Y-%m-%d')
-  dfr <- data.frame(DateStamp=ts)
+  dfr <- data.frame(DateStamp = ts)
   # Merge the two dataframes to fill in missing dates
   data_with_missing_times <- full_join(dfr,df)
   # shortening to make typing (and copying examples) easiers
@@ -31,15 +41,16 @@ SummarizeByMonth <- function(df, summarizationMethod, flipNA) {
   df$month <- format(as.Date(df$DateStamp), "%Y-%m")
 
   # Because we're looping, we need a tempoary dataframe to hold our results
-  # We start with just a dataframe of the weeks (made unique)
-  tempdf <- data.frame(month=unique(df$month))
+  # We start with just a dataframe of the months (made unique)
+  tempdf <- data.frame(month = unique(df$month))
 
 
   for (columnName in names(df)) {
     # columnName <- i # switch i to columnName to make it
-    if(columnName == "DateStamp") next # skip the DateStamp column
-    if(columnName == "timestamp") next # skip the DateStamp column
-    if(columnName == "month") next # skip the DateStamp column
+    if (columnName == "DateStamp") next # skip the DateStamp column
+    if (columnName == "timestamp") next # skip the DateStamp column
+    if (columnName == "month") next # skip the DateStamp column
+    if (columnName == dateCol) next # skip variable DateStamp column
 
     # Make a dataframe that is a simplified with just what we need
     data <- data.frame()
@@ -52,7 +63,7 @@ SummarizeByMonth <- function(df, summarizationMethod, flipNA) {
 
 
     # Take any NA and make it 0
-    if(flipNA)
+    if (flipNA)
       data$values[is.na(data$values)] <- 0
 
     # Take the column name and create two column names
@@ -60,15 +71,15 @@ SummarizeByMonth <- function(df, summarizationMethod, flipNA) {
     sdColumnName <- paste0(columnName,"Sd")
 
     # Create dfs for mean and stddev
-    if(summarizationMethod == "mean") {
-      workingDF <- ddply(data, .(month), summarise, ValuesMn=mean(values))
+    if (summarizationMethod == "mean") {
+      workingDF <- ddply(data, .(month), summarise, ValuesMn = mean(values))
       colnames(workingDF)[2] <- meanColumnName
-      sdDF <- ddply(data, .(month), summarise, ValuesSD=sd(values))
+      sdDF <- ddply(data, .(month), summarise, ValuesSD = sd(values))
       colnames(sdDF)[2] <- sdColumnName
       jnDF <- full_join(tempdf, workingDF)
       tempdf <- full_join(jnDF, sdDF)
-    } else if(summarizationMethod == "sum") {
-      workingDF <- ddply(data, .(month), summarise, ValuesMn=sum(values))
+    } else if (summarizationMethod == "sum") {
+      workingDF <- ddply(data, .(month), summarise, ValuesMn = sum(values))
       colnames(workingDF)[2] <- meanColumnName
       jnDF <- full_join(tempdf, workingDF)
       tempdf <- jnDF
